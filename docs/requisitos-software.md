@@ -6,8 +6,8 @@
 - **Disciplina:** Engenharia de Software
 - **Instituição:** Universidade Federal do Amapá (UNIFAP)
 - **Semestre:** 2026.1
-- **Versão do documento:** 0.1
-- **Status:** versão inicial para discussão e complementação pela equipe
+- **Versão do documento:** 0.2
+- **Status:** atualizado com priorização e glossário
 
 ---
 
@@ -74,7 +74,47 @@ Nesta versão inicial, o documento não pretende descrever todos os fluxos, regr
 
 ---
 
-## 8. Regras de Negócio Iniciais
+## 8. Priorização dos Requisitos
+
+Os requisitos foram classificados em três níveis: **MVP** (entrega mínima funcional), **Desejável** (agrega valor mas não bloqueia o MVP) e **Futuro** (fora do escopo atual, para versões posteriores).
+
+### Requisitos Funcionais
+
+| ID | Descrição resumida | Prioridade |
+|----|--------------------|-----------|
+| RF-01 | Registro anônimo de denúncias | **MVP** |
+| RF-02 | Seleção de categoria | **MVP** |
+| RF-04 | Geração de protocolo único | **MVP** |
+| RF-05 | Consulta de status por protocolo | **MVP** |
+| RF-07 | Login de administrador | **MVP** |
+| RF-08 | Visualização de denúncias (admin) | **MVP** |
+| RF-11 | Atualização de status (admin) | **MVP** |
+| RF-14 | Histórico de alterações | **MVP** |
+| RF-03 | Anexo de evidências | Desejável |
+| RF-09 | Detalhes completos de denúncia | Desejável |
+| RF-10 | Filtros por categoria, status ou data | Desejável |
+| RF-12 | Comentários internos (admin) | Desejável |
+| RF-06 | Cadastro de novos administradores | Desejável |
+| RF-13 | Encaminhamento entre setores | Futuro |
+
+### Requisitos Não Funcionais
+
+| ID | Descrição resumida | Prioridade |
+|----|--------------------|-----------|
+| RNF-01 | Acessível por navegador web | **MVP** |
+| RNF-03 | Garantia de anonimato | **MVP** |
+| RNF-05 | Autenticação de administradores | **MVP** |
+| RNF-02 | Interface responsiva | Desejável |
+| RNF-04 | Criptografia de dados sensíveis | Desejável |
+| RNF-06 | Tempo de resposta adequado | Desejável |
+| RNF-07 | Organização e legibilidade do código | Desejável |
+| RNF-08 | Documentação em pasta própria | Desejável |
+| RNF-09 | Extensibilidade futura | Futuro |
+| RNF-10 | Alta disponibilidade | Futuro |
+
+---
+
+## 9. Regras de Negócio Iniciais
 
 - **RN-01:** o registro de denúncias deve ser permitido sem cadastro ou autenticação do cidadão.
 - **RN-02:** toda denúncia registrada deve conter ao menos uma categoria e uma descrição para ser concluída.
@@ -89,7 +129,25 @@ Nesta versão inicial, o documento não pretende descrever todos os fluxos, regr
 
 ---
 
-## 9. Organização Recomendada do Repositório
+## 10. Glossário
+
+| Termo | Definição |
+|-------|-----------|
+| **Denúncia** | Relato anônimo registrado por um cidadão descrevendo uma irregularidade, crime, ato de corrupção ou situação de risco. Cada denúncia recebe um código de protocolo único. |
+| **Denunciante** | Cidadão que registra uma denúncia no sistema. Não é necessário se identificar ou criar conta. |
+| **Protocolo** | Código alfanumérico único gerado automaticamente pelo sistema ao final de cada registro de denúncia, no formato `DEN-XXXXXXXX`. Serve como chave de rastreamento pública. |
+| **Categoria** | Classificação temática da denúncia. As categorias disponíveis são: Corrupção, Assédio, Violência, Irregularidade Administrativa e Outros. |
+| **Status** | Estado atual do tratamento de uma denúncia. Os estados possíveis são: `RECEBIDA` (registrada, aguardando análise), `EM_ANALISE` (em processo de investigação), `ENCAMINHADA` (enviada para outro setor) e `ENCERRADA` (caso concluído). |
+| **Administrador** | Gestor institucional com acesso autenticado ao painel do sistema. Pode visualizar, atualizar e encaminhar denúncias, além de adicionar comentários internos. |
+| **Comentário interno** | Nota adicionada por um administrador a uma denúncia para registro de observações e decisões. Nunca é visível ao denunciante na consulta pública. |
+| **Histórico de status** | Registro cronológico de todas as alterações de status sofridas por uma denúncia, incluindo data, hora e administrador responsável. Não pode ser apagado. |
+| **Evidência** | Arquivo (imagem, documento ou vídeo) anexado pelo denunciante como suporte à sua denúncia. Armazenado de forma segura e acessível apenas por administradores. |
+| **Painel administrativo** | Interface restrita do sistema, acessível apenas por administradores autenticados, onde é possível gerenciar todas as denúncias recebidas. |
+| **Anonimato** | Princípio central do sistema: nenhum dado pessoal do denunciante é coletado, armazenado ou exibido em qualquer tela pública do sistema. |
+
+---
+
+## 11. Organização Recomendada do Repositório
 
 ```
 /
@@ -97,18 +155,30 @@ Nesta versão inicial, o documento não pretende descrever todos os fluxos, regr
 ├── docs/
 │   ├── requisitos-software.md
 │   ├── documento-visao.md
-│   └── user-stories.md
+│   ├── user-stories.md
+│   ├── descricoes-casos-de-uso.md
+│   ├── diagrama-casos-de-uso.png
+│   ├── diagrama-classes.pdf
+│   ├── diagrama-sequencia-1-registrar.pdf
+│   ├── diagrama-sequencia-2-atualizar-status.pdf
+│   ├── diagrama-atividades.pdf
+│   └── justificativa-modelagem.md
 ├── src/
-│   ├── frontend/
-│   └── backend/
+│   └── denuncia/
+│       ├── app.py
+│       ├── src/
+│       │   ├── controllers/
+│       │   ├── models/
+│       │   ├── repositories/
+│       │   └── services/
+│       ├── static/
+│       └── templates/
 └── tests/
 ```
 
-A estrutura acima é uma sugestão inicial e pode ser ajustada conforme as tecnologias escolhidas pela equipe.
-
 ---
 
-## 10. Critérios Básicos de Aceitação
+## 12. Critérios Básicos de Aceitação
 
 - Cidadãos conseguem registrar uma denúncia sem se identificar.
 - O sistema gera e exibe um código de protocolo ao final do registro.
@@ -120,10 +190,8 @@ A estrutura acima é uma sugestão inicial e pode ser ajustada conforme as tecno
 
 ---
 
-## 11. Pendências para Refinamento
+## 13. Pendências para Refinamento
 
-- Definir tecnologias de frontend, backend e banco de dados.
 - Detalhar os campos obrigatórios do registro de denúncia e do cadastro de administradores.
-- Definir os estados possíveis do ciclo de vida de uma denúncia.
 - Definir regras de permissão entre diferentes perfis de administrador.
 - Definir responsabilidades da equipe por módulo.
