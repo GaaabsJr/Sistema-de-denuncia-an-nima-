@@ -91,7 +91,10 @@
         <div class="protocolo-box">
           <p>Sua denúncia foi registrada! Guarde este código:</p>
           <div class="protocolo-code" id="protocolo-gerado"></div>
-          <p>Use este código para acompanhar o andamento do seu caso.</p>
+          <button class="btn btn-primary mt-1" onclick="copiarProtocolo()" id="btn-copiar">
+            📋 Copiar código
+          </button>
+          <p style="margin-top:.75rem">Use este código para acompanhar o andamento do seu caso.</p>
         </div>
         <button class="btn btn-ghost mt-1" onclick="irPara('consultar')">Consultar status →</button>
       </div>
