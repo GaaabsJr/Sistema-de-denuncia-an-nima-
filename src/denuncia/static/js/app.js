@@ -271,3 +271,23 @@ async function enviarComentario() {
     alert(data.erro || "Erro ao comentar.");
   }
 }
+
+async function copiarProtocolo() {
+  const codigo = document.getElementById("protocolo-gerado").textContent.trim();
+  const btn = document.getElementById("btn-copiar");
+  try {
+    await navigator.clipboard.writeText(codigo);
+    btn.textContent = " Copiado!";
+    setTimeout(() => { btn.textContent = " Copiar código"; }, 2500);
+  } catch {
+    // fallback para navegadores sem suporte ao clipboard
+    const input = document.createElement("input");
+    input.value = codigo;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand("copy");
+    document.body.removeChild(input);
+    btn.textContent = " Copiado!";
+    setTimeout(() => { btn.textContent = "Copiar código"; }, 2500);
+  }
+}
