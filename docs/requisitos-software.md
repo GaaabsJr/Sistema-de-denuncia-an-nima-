@@ -61,16 +61,20 @@ Nesta versão inicial, o documento não pretende descrever todos os fluxos, regr
 
 ## 7. Requisitos Não Funcionais
 
-- **RNF-01:** a plataforma deve ser acessível por navegador web.
-- **RNF-02:** a interface deve ser responsiva para computadores, tablets e celulares.
-- **RNF-03:** o sistema deve garantir o anonimato do denunciante, não armazenando dados pessoais identificáveis sem consentimento explícito.
-- **RNF-04:** o sistema deve utilizar criptografia no armazenamento e na transmissão de dados sensíveis.
-- **RNF-05:** o sistema deve utilizar mecanismos de autenticação para controlar o acesso ao painel administrativo.
-- **RNF-06:** as páginas de registro e consulta devem apresentar tempo de resposta adequado para uso em produção.
-- **RNF-07:** o código-fonte deve ser organizado de forma clara, favorecendo manutenção e evolução.
-- **RNF-08:** a documentação deve ser mantida em uma pasta própria do repositório.
-- **RNF-09:** o sistema deve ser projetado para permitir inclusão futura de novos perfis, categorias, integrações e fluxos de notificação.
-- **RNF-10:** a plataforma deve estar disponível para acesso na maior parte do tempo, garantindo que cidadãos e administradores possam utilizá-la sem interrupções frequentes.
+Os requisitos não funcionais foram categorizados segundo o modelo **FURPS+** (Functionality, Usability, Reliability, Performance, Supportability, +constraints) e escritos de forma mensurável, evitando termos vagos como "rápido" ou "adequado".
+
+| ID | Categoria FURPS+ | Descrição (mensurável) |
+|----|-------------------|--------------------------|
+| **RNF-01** | Usability | A interface deve ser responsiva e utilizável sem quebra de layout em resoluções de 360px (celular) a 1920px (desktop). |
+| **RNF-02** | Usability | Um cidadão deve conseguir concluir o registro de uma denúncia em no máximo 3 telas/etapas a partir da página inicial, sem necessidade de treinamento prévio. |
+| **RNF-03** | Functionality (Security) | O sistema não deve coletar, armazenar ou exibir nenhum dado pessoal identificável do denunciante (nome, e-mail, IP, telefone) em nenhuma tabela do banco ou tela pública — verificável por inspeção do schema em `models/database.py`. |
+| **RNF-04** | Functionality (Security) | Senhas de administradores devem ser armazenadas apenas como hash (SHA-256 ou superior), nunca em texto puro; em ambiente de produção, toda comunicação deve usar HTTPS. |
+| **RNF-05** | Functionality (Security) | Toda rota sob `/api/admin/*` deve exigir sessão autenticada válida; requisições sem sessão devem retornar HTTP 401 em 100% dos casos (coberto pelos testes IT-07). |
+| **RNF-06** | Performance | O tempo de resposta das rotas de registro (`POST /api/denuncia/`) e consulta por protocolo (`GET /api/denuncia/protocolo/<cod>`) deve ser inferior a 2 segundos para 95% das requisições, em ambiente local com carga de até 50 requisições simultâneas. |
+| **RNF-07** | Supportability (Maintainability) | O código-fonte deve manter separação em 4 camadas (controller, service, repository, model), com cobertura de testes automatizados de no mínimo 40% nas classes de regra de negócio — meta já superada (92% medido via pytest-cov). |
+| **RNF-08** | Supportability | A documentação do projeto deve ser mantida na pasta `docs/` e versionada no mesmo repositório Git do código-fonte, nunca distribuída em arquivos separados. |
+| **RNF-09** | Supportability (Extensibility) | A inclusão de uma nova categoria de denúncia ou um novo estado de status deve exigir alteração em no máximo 1 constante/enum do sistema (`CATEGORIAS_VALIDAS` ou `TRANSICOES_VALIDAS`), sem modificar a lógica das classes de serviço — princípio Open/Closed aplicado. |
+| **RNF-10** | Reliability | O sistema não deve encerrar ou travar em caso de falha de acesso ao banco de dados; erros devem ser tratados e retornados como HTTP 500 com mensagem padronizada, preservando a sessão do usuário. |
 
 ---
 
@@ -101,16 +105,16 @@ Os requisitos foram classificados em três níveis: **MVP** (entrega mínima fun
 
 | ID | Descrição resumida | Prioridade |
 |----|--------------------|-----------|
-| RNF-01 | Acessível por navegador web | **MVP** |
-| RNF-03 | Garantia de anonimato | **MVP** |
-| RNF-05 | Autenticação de administradores | **MVP** |
-| RNF-02 | Interface responsiva | Desejável |
-| RNF-04 | Criptografia de dados sensíveis | Desejável |
-| RNF-06 | Tempo de resposta adequado | Desejável |
-| RNF-07 | Organização e legibilidade do código | Desejável |
-| RNF-08 | Documentação em pasta própria | Desejável |
-| RNF-09 | Extensibilidade futura | Futuro |
-| RNF-10 | Alta disponibilidade | Futuro |
+| RNF-01 | Interface responsiva (360px–1920px) | **MVP** |
+| RNF-03 | Nenhum dado pessoal identificável armazenado | **MVP** |
+| RNF-05 | Autenticação obrigatória nas rotas `/api/admin/*` | **MVP** |
+| RNF-02 | Registro concluído em até 3 telas | Desejável |
+| RNF-04 | Senhas em hash + HTTPS em produção | Desejável |
+| RNF-06 | Resposta < 2s para 95% das requisições | Desejável |
+| RNF-07 | Cobertura de testes ≥ 40% nas classes de negócio | Desejável |
+| RNF-08 | Documentação versionada em `docs/` | Desejável |
+| RNF-09 | Novas categorias/status via 1 constante (OCP) | Futuro |
+| RNF-10 | Falhas de banco tratadas sem travar o sistema | Futuro |
 
 ---
 
