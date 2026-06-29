@@ -110,7 +110,16 @@ A equipe demorou para começar a fazer commits regulares no repositório. Nos pr
 
 ### O que faríamos diferente
 
-Crearíamos o quadro Kanban no GitHub Projects desde o primeiro dia, em vez de gerenciar as tarefas informalmente por mensagens. Também definiríamos uma convenção de commits desde o início (como Conventional Commits: `feat:`, `docs:`, `test:`) para que o histórico do repositório ficasse mais organizado e profissional. Por fim, escreveríamos pelo menos um teste simples antes de cada funcionalidade nova — a prática de TDD que o professor mencionou faz sentido e facilitaria detectar erros mais cedo.
+Crearíamos o quadro Kanban no GitHub Projects desde o primeiro dia, em vez de gerenciar as tarefas informalmente por mensagens. Também definiríamos uma convenção de commits desde o início (como Conventional Commits: `feat:`, `docs:`, `test:`) para que o histórico do repositório ficasse mais organizado e profissional.
+
+### Evidência de TDD
+
+Aplicamos TDD na funcionalidade de validação de anexo de evidências (RF-03 / US-03 — `validar_evidencia`). Os testes (`test_validar_evidencia_formato_aceito`, `test_validar_evidencia_formato_rejeitado`, `test_validar_evidencia_tamanho_maximo_excedido`) foram escritos e commitados antes de qualquer linha de implementação existir, falhando com `AttributeError` (método inexistente) na primeira execução. Só depois disso o método `validar_evidencia()` foi implementado em `denuncia_service.py`, fazendo os 3 testes passarem.
+
+- Commit do teste (vermelho): `test: adiciona testes para validar_evidencia (RF-03) - TDD, ainda falhando` — `<preencher hash do commit>`
+- Commit da implementação (verde): `feat: implementa validar_evidencia (RF-03/US-03) - testes passando (TDD)` — `<preencher hash do commit>`
+
+Essa prática confirmou o que já intuíamos: escrever o teste primeiro obriga a pensar na interface do método (nomes de parâmetros, tipo de retorno, mensagens de erro) antes de qualquer detalhe de implementação — e o teste falhando corretamente (por `AttributeError`, não por erro de sintaxe) foi a confirmação de que o teste em si estava bem escrito.
 
 ### Aprendizados técnicos
 
