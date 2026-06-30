@@ -61,6 +61,18 @@ function irPara(pagina) {
 const formDenuncia = document.getElementById("form-denuncia");
 const alertDenuncia = document.getElementById("alert-denuncia");
 const resultadoDenuncia = document.getElementById("resultado-denuncia");
+const statusEvidencia = document.getElementById("status-evidencia");
+
+async function enviarEvidencia(protocolo, arquivo) {
+  const formData = new FormData();
+  formData.append("arquivo", arquivo);
+  const res = await fetch(`${API}/api/denuncia/${protocolo}/evidencia`, {
+    method: "POST",
+    body: formData
+  });
+  const data = await res.json();
+  return { ok: res.ok, data };
+}
 
 if (formDenuncia) {
   formDenuncia.addEventListener("submit", async (e) => {
@@ -68,6 +80,9 @@ if (formDenuncia) {
     const btn = formDenuncia.querySelector("button[type=submit]");
     btn.disabled = true;
     btn.textContent = "Enviando...";
+
+    const inputEvidencia = document.getElementById("evidencia");
+    const arquivo = inputEvidencia.files[0] || null;
 
     const { ok, data } = await api("POST", "/api/denuncia/", {
       descricao: document.getElementById("descricao").value,
@@ -78,6 +93,15 @@ if (formDenuncia) {
     btn.textContent = "Enviar denúncia";
 
     if (ok) {
+      statusEvidencia.textContent = "";
+
+      if (arquivo) {
+        const evidenciaResp = await enviarEvidencia(data.protocolo, arquivo);
+        statusEvidencia.textContent = evidenciaResp.ok
+          ? `📎 Evidência "${arquivo.name}" anexada com sucesso.`
+          : `⚠️ Denúncia registrada, mas a evidência não pôde ser anexada: ${evidenciaResp.data.erro}`;
+      }
+
       formDenuncia.reset();
       document.getElementById("protocolo-gerado").textContent = data.protocolo;
       resultadoDenuncia.classList.remove("d-none");

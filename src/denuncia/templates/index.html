@@ -84,6 +84,12 @@
           <textarea id="descricao" placeholder="Descreva o ocorrido com o máximo de detalhes possível..." required></textarea>
         </div>
 
+        <div class="form-group">
+          <label for="evidencia">Anexar evidência (opcional)</label>
+          <input type="file" id="evidencia" accept=".jpg,.jpeg,.png,.pdf,.docx,.mp4">
+          <small class="text-muted">Imagem, PDF, DOCX ou vídeo — máx. 10MB.</small>
+        </div>
+
         <button type="submit" class="btn btn-primary">Enviar denúncia</button>
       </form>
 
@@ -94,6 +100,7 @@
           <button class="btn btn-primary mt-1" onclick="copiarProtocolo()" id="btn-copiar">
              Copiar código
           </button>
+          <p id="status-evidencia" style="margin-top:.75rem"></p>
           <p style="margin-top:.75rem">Use este código para acompanhar o andamento do seu caso.</p>
         </div>
         <button class="btn btn-ghost mt-1" onclick="irPara('consultar')">Consultar status →</button>

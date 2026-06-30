@@ -88,6 +88,41 @@ def test_api_consultar_protocolo_invalido(client):
     assert res.status_code == 404
 
 
+def test_api_anexar_evidencia(client, monkeypatch, tmp_path):
+    """RF-03/US-03: POST /api/denuncia/<protocolo>/evidencia deve aceitar e salvar o arquivo."""
+    import src.services.denuncia_service as service_module
+    monkeypatch.setattr(service_module, "UPLOAD_DIR", str(tmp_path))
+
+    d = registrar_denuncia(client)
+    from io import BytesIO
+    res = client.post(
+        f"/api/denuncia/{d['protocolo']}/evidencia",
+        data={"arquivo": (BytesIO(b"conteudo-fake"), "print.png")},
+        content_type="multipart/form-data"
+    )
+    assert res.status_code == 201
+    data = json.loads(res.data)
+    assert data["nome_arquivo"] == "print.png"
+
+    consulta = client.get(f"/api/denuncia/protocolo/{d['protocolo']}")
+    assert len(json.loads(consulta.data)["evidencias"]) == 1
+
+
+def test_api_anexar_evidencia_formato_invalido(client, monkeypatch, tmp_path):
+    """RF-03/US-03: formato não aceito deve retornar 400."""
+    import src.services.denuncia_service as service_module
+    monkeypatch.setattr(service_module, "UPLOAD_DIR", str(tmp_path))
+
+    d = registrar_denuncia(client)
+    from io import BytesIO
+    res = client.post(
+        f"/api/denuncia/{d['protocolo']}/evidencia",
+        data={"arquivo": (BytesIO(b"conteudo"), "virus.exe")},
+        content_type="multipart/form-data"
+    )
+    assert res.status_code == 400
+
+
 # ── Autenticação ──────────────────────────────────────────────────────────────
 
 def test_api_login_valido(client):

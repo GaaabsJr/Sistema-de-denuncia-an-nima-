@@ -210,3 +210,64 @@ def test_comentario_nao_visivel_na_consulta_publica(service):
     consulta = service.consultar_por_protocolo(r["protocolo"])
     # consulta pública não expõe comentários
     assert "comentarios" not in consulta
+
+
+# ── Anexo de evidências (US-03 / RF-03) ─────────────────────────────────────────
+# Escritos ANTES da implementação de validar_evidencia() — ciclo TDD (vermelho → verde).
+
+def test_validar_evidencia_formato_aceito(service):
+    """RF-03: deve aceitar arquivos com extensão de imagem, documento ou vídeo."""
+    assert service.validar_evidencia("foto.jpg", tamanho_bytes=2_000_000) is True
+    assert service.validar_evidencia("laudo.pdf", tamanho_bytes=2_000_000) is True
+    assert service.validar_evidencia("video.mp4", tamanho_bytes=2_000_000) is True
+
+
+def test_validar_evidencia_formato_rejeitado(service):
+    """RF-03: deve rejeitar extensões fora da lista permitida."""
+    with pytest.raises(ValueError, match="formato"):
+        service.validar_evidencia("script.exe", tamanho_bytes=1_000)
+
+
+def test_validar_evidencia_tamanho_maximo_excedido(service):
+    """US-03: deve informar claramente o tamanho máximo aceito (10MB)."""
+    onze_mb = 11 * 1024 * 1024
+    with pytest.raises(ValueError, match="tamanho"):
+        service.validar_evidencia("foto.jpg", tamanho_bytes=onze_mb)
+
+
+# ── Anexar evidência a uma denúncia existente (US-03 / RF-03) ───────────────────
+# Escritos ANTES da implementação de anexar_evidencia() — ciclo TDD (vermelho → verde).
+
+def test_anexar_evidencia_sucesso(service, monkeypatch, tmp_path):
+    import src.services.denuncia_service as service_module
+    monkeypatch.setattr(service_module, "UPLOAD_DIR", str(tmp_path))
+
+    r = service.registrar("Denúncia com evidência anexada em seguida.", "OUTROS")
+    resultado = service.anexar_evidencia(r["protocolo"], "foto.jpg", b"conteudo-fake-da-imagem")
+
+    assert resultado["nome_arquivo"] == "foto.jpg"
+    assert resultado["tamanho_bytes"] == len(b"conteudo-fake-da-imagem")
+
+    consulta = service.consultar_por_protocolo(r["protocolo"])
+    assert len(consulta["evidencias"]) == 1
+    assert consulta["evidencias"][0]["nome_arquivo"] == "foto.jpg"
+
+
+def test_anexar_evidencia_protocolo_inexistente(service, monkeypatch, tmp_path):
+    import src.services.denuncia_service as service_module
+    monkeypatch.setattr(service_module, "UPLOAD_DIR", str(tmp_path))
+
+    with pytest.raises(ValueError, match="Protocolo não encontrado"):
+        service.anexar_evidencia("DEN-00000000", "foto.jpg", b"conteudo")
+
+
+def test_anexar_evidencia_formato_invalido_nao_grava_arquivo(service, monkeypatch, tmp_path):
+    import src.services.denuncia_service as service_module
+    monkeypatch.setattr(service_module, "UPLOAD_DIR", str(tmp_path))
+
+    r = service.registrar("Denúncia para testar rejeição de formato.", "OUTROS")
+    with pytest.raises(ValueError, match="formato"):
+        service.anexar_evidencia(r["protocolo"], "virus.exe", b"conteudo")
+
+    consulta = service.consultar_por_protocolo(r["protocolo"])
+    assert len(consulta["evidencias"]) == 0
