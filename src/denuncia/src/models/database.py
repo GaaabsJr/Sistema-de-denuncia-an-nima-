@@ -35,6 +35,7 @@ def init_db():
             denuncia_id     INTEGER NOT NULL REFERENCES denuncia(id),
             nome_arquivo    TEXT    NOT NULL,
             tipo_arquivo    TEXT    NOT NULL,
+            tamanho_bytes   INTEGER NOT NULL DEFAULT 0,
             caminho         TEXT    NOT NULL,
             data_upload     TEXT    NOT NULL
         );
@@ -67,6 +68,12 @@ def init_db():
             ativo           INTEGER NOT NULL DEFAULT 1
         );
     """)
+
+    # Migração segura: bancos já existentes podem não ter a coluna nova
+    try:
+        cursor.execute("ALTER TABLE evidencia ADD COLUMN tamanho_bytes INTEGER NOT NULL DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass  # coluna já existe
 
     # Admin padrão para demo
     cursor.execute(
