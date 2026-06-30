@@ -16,6 +16,7 @@ Cobre:
   - Rejeição de comentário vazio
 """
 
+import os
 import pytest
 from src.services.denuncia_service import DenunciaService
 
@@ -271,3 +272,41 @@ def test_anexar_evidencia_formato_invalido_nao_grava_arquivo(service, monkeypatc
 
     consulta = service.consultar_por_protocolo(r["protocolo"])
     assert len(consulta["evidencias"]) == 0
+
+
+def test_buscar_detalhes_admin_inclui_evidencias(service, monkeypatch, tmp_path):
+    """Bug relatado: evidências não apareciam no painel do admin (buscar_detalhes)."""
+    import src.services.denuncia_service as service_module
+    monkeypatch.setattr(service_module, "UPLOAD_DIR", str(tmp_path))
+
+    r = service.registrar("Denúncia para checar evidência no painel do admin.", "OUTROS")
+    service.anexar_evidencia(r["protocolo"], "print.png", b"conteudo-do-print")
+
+    d = service.listar()[0]
+    detalhes = service.buscar_detalhes(d["id"])
+
+    assert "evidencias" in detalhes
+    assert len(detalhes["evidencias"]) == 1
+    assert detalhes["evidencias"][0]["nome_arquivo"] == "print.png"
+    assert "caminho" not in detalhes["evidencias"][0]  # não deve vazar path interno
+
+
+def test_caminho_evidencia_para_download(service, monkeypatch, tmp_path):
+    import src.services.denuncia_service as service_module
+    monkeypatch.setattr(service_module, "UPLOAD_DIR", str(tmp_path))
+
+    r = service.registrar("Denúncia para testar download de evidência.", "OUTROS")
+    service.anexar_evidencia(r["protocolo"], "laudo.pdf", b"conteudo-do-laudo")
+
+    d = service.listar()[0]
+    detalhes = service.buscar_detalhes(d["id"])
+    evidencia_id = detalhes["evidencias"][0]["id"]
+
+    info = service.caminho_evidencia(evidencia_id)
+    assert info["nome_arquivo"] == "laudo.pdf"
+    assert os.path.exists(info["caminho"])
+
+
+def test_caminho_evidencia_inexistente(service):
+    with pytest.raises(ValueError, match="Evidência não encontrada"):
+        service.caminho_evidencia(9999)

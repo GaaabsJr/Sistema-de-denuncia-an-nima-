@@ -232,6 +232,21 @@ async function abrirDetalhe(id) {
   document.getElementById("modal-id").value = id;
   document.getElementById("modal-status-atual").textContent = data.status;
 
+  // evidências anexadas
+  function fmtBytes(n) {
+    if (!n && n !== 0) return "";
+    if (n < 1024) return `${n} B`;
+    if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`;
+    return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+  }
+  document.getElementById("modal-evidencias").innerHTML =
+    (data.evidencias || []).map(ev => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.83rem;">
+        <span>📎 ${ev.nome_arquivo} <span class="text-muted">(${fmtBytes(ev.tamanho_bytes)})</span></span>
+        <a href="/api/admin/evidencias/${ev.id}/download" target="_blank" class="btn btn-ghost btn-sm">Baixar</a>
+      </div>
+    `).join("") || "<p class='text-muted'>Nenhuma evidência anexada.</p>";
+
   // histórico
   document.getElementById("modal-historico").innerHTML =
     (data.historico || []).map(h => `

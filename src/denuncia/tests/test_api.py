@@ -123,6 +123,57 @@ def test_api_anexar_evidencia_formato_invalido(client, monkeypatch, tmp_path):
     assert res.status_code == 400
 
 
+def test_api_admin_detalhe_mostra_evidencias(client, monkeypatch, tmp_path):
+    """Bug relatado: evidências não apareciam no painel do admin."""
+    import src.services.denuncia_service as service_module
+    monkeypatch.setattr(service_module, "UPLOAD_DIR", str(tmp_path))
+
+    d = registrar_denuncia(client)
+    from io import BytesIO
+    client.post(
+        f"/api/denuncia/{d['protocolo']}/evidencia",
+        data={"arquivo": (BytesIO(b"conteudo-fake"), "print.png")},
+        content_type="multipart/form-data"
+    )
+
+    login_admin(client)
+    denuncias = json.loads(client.get("/api/admin/denuncias").data)
+    denuncia_id = denuncias[0]["id"]
+
+    detalhe = client.get(f"/api/admin/denuncias/{denuncia_id}")
+    data = json.loads(detalhe.data)
+    assert len(data["evidencias"]) == 1
+    assert data["evidencias"][0]["nome_arquivo"] == "print.png"
+
+
+def test_api_admin_download_evidencia(client, monkeypatch, tmp_path):
+    """RF-03/US-03: admin autenticado deve conseguir baixar a evidência anexada."""
+    import src.services.denuncia_service as service_module
+    monkeypatch.setattr(service_module, "UPLOAD_DIR", str(tmp_path))
+
+    d = registrar_denuncia(client)
+    from io import BytesIO
+    client.post(
+        f"/api/denuncia/{d['protocolo']}/evidencia",
+        data={"arquivo": (BytesIO(b"conteudo-fake"), "print.png")},
+        content_type="multipart/form-data"
+    )
+
+    login_admin(client)
+    denuncia_id = json.loads(client.get("/api/admin/denuncias").data)[0]["id"]
+    evidencia_id = json.loads(client.get(f"/api/admin/denuncias/{denuncia_id}").data)["evidencias"][0]["id"]
+
+    res = client.get(f"/api/admin/evidencias/{evidencia_id}/download")
+    assert res.status_code == 200
+    assert res.data == b"conteudo-fake"
+
+
+def test_api_admin_download_evidencia_sem_login(client):
+    """Download de evidência também deve exigir sessão de admin."""
+    res = client.get("/api/admin/evidencias/1/download")
+    assert res.status_code == 401
+
+
 # ── Autenticação ──────────────────────────────────────────────────────────────
 
 def test_api_login_valido(client):
