@@ -31,3 +31,21 @@ def consultar(protocolo):
         return jsonify(_service.consultar_por_protocolo(protocolo))
     except ValueError as e:
         return jsonify({"erro": str(e)}), 404
+
+
+# RF-03, US-03: anexar evidência a uma denúncia já registrada (sem login)
+@bp.post("/<protocolo>/evidencia")
+def anexar_evidencia(protocolo):
+    arquivo = request.files.get("arquivo")
+    if not arquivo or not arquivo.filename:
+        return jsonify({"erro": "Nenhum arquivo enviado."}), 400
+    try:
+        resultado = _service.anexar_evidencia(
+            protocolo=protocolo,
+            nome_arquivo=arquivo.filename,
+            conteudo=arquivo.read()
+        )
+        return jsonify(resultado), 201
+    except ValueError as e:
+        status = 404 if "Protocolo não encontrado" in str(e) else 400
+        return jsonify({"erro": str(e)}), status
