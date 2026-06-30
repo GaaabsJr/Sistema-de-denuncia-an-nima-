@@ -84,6 +84,14 @@ class EvidenciaRepository:
         conn.close()
         return [dict(r) for r in rows]
 
+    def buscar_por_id(self, evidencia_id):
+        conn = get_connection()
+        row = conn.execute(
+            "SELECT * FROM evidencia WHERE id = ?", (evidencia_id,)
+        ).fetchone()
+        conn.close()
+        return dict(row) if row else None
+
 
 class ComentarioRepository:
 

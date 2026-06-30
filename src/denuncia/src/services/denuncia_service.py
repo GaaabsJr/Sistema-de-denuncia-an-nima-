@@ -113,7 +113,19 @@ class DenunciaService:
             raise ValueError("Denúncia não encontrada.")
         d["historico"]   = self._historico.listar_por_denuncia(denuncia_id)
         d["comentarios"] = self._comentario.listar_por_denuncia(denuncia_id)
+        d["evidencias"]  = [
+            {"id": e["id"], "nome_arquivo": e["nome_arquivo"], "tipo_arquivo": e["tipo_arquivo"],
+             "tamanho_bytes": e["tamanho_bytes"], "data_upload": e["data_upload"]}
+            for e in self._evidencia.listar_por_denuncia(denuncia_id)
+        ]
         return d
+
+    # RF-07: recupera o caminho em disco de uma evidência, para download pelo admin
+    def caminho_evidencia(self, evidencia_id: int) -> dict:
+        e = self._evidencia.buscar_por_id(evidencia_id)
+        if not e:
+            raise ValueError("Evidência não encontrada.")
+        return e
 
     # RF-03, US-03: valida formato e tamanho de um anexo de evidência
     def validar_evidencia(self, nome_arquivo: str, tamanho_bytes: int) -> bool:
