@@ -3,7 +3,7 @@ controllers/admin_controller.py
 Rotas protegidas — requer sessão de administrador (RF-06, RF-07, RF-08).
 """
 
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, send_file
 from functools import wraps
 from src.services.denuncia_service import DenunciaService
 from src.services.auth_service import AuthService
@@ -100,3 +100,16 @@ def comentar(denuncia_id):
         return jsonify({"mensagem": "Comentário adicionado."})
     except ValueError as e:
         return jsonify({"erro": str(e)}), 400
+
+
+# RF-03/US-03: download de uma evidência anexada (apenas admin autenticado)
+@bp.get("/evidencias/<int:evidencia_id>/download")
+@requer_login
+def baixar_evidencia(evidencia_id):
+    try:
+        e = _service.caminho_evidencia(evidencia_id)
+        return send_file(e["caminho"], download_name=e["nome_arquivo"], as_attachment=True)
+    except ValueError as e:
+        return jsonify({"erro": str(e)}), 404
+    except FileNotFoundError:
+        return jsonify({"erro": "Arquivo não encontrado no servidor."}), 404
