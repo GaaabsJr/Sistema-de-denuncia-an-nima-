@@ -10,7 +10,7 @@ Repositório destinado ao projeto final da disciplina de Engenharia de Software,
 - Eric Felipe da Silva Fernandes
 - Gabriel Alves Lima
 - Johan Mateus de Oliveira Natividade
-- João Lucas Sena
+- João Lucas Farias De Sena
 
 ---
 
