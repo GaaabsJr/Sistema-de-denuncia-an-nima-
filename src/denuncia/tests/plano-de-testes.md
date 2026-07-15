@@ -81,8 +81,8 @@ pytest tests/ -v --cov=src --cov-report=term-missing
 ```
 pytest tests/ -v --cov=src --cov-report=term-missing
 ```
+<img width="923" height="775" alt="Captura de Tela 2026-07-14 às 23 25 18" src="https://github.com/user-attachments/assets/cc8d5d30-c27f-4d99-9575-d40f9f884691" />
 
-> Executar e colar o resultado aqui antes da entrega.
 
 ---
 
